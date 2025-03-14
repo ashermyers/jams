@@ -90,7 +90,7 @@ export function MonthView({
         openEditEventDialog(event);
 
         // Ensure the add event dialog is closed
-        closeDialog();
+        // closeDialog();
     }
 
     const handleDeleteEvent = (eventId: string, e: React.MouseEvent) => {

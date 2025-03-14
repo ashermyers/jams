@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { format } from "date-fns"
 import { CalendarHeader } from "./CalendarHeader"
 import { MonthView } from "./MonthView"
 import { YearView } from "./YearView"
