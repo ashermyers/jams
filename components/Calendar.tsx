@@ -8,53 +8,50 @@ import { EventDialogs } from "./EventDialogs"
 import { Event } from "./types"
 
 export default function GoogleCalendarClone() {
-    const [currentDate, setCurrentDate] = React.useState<Date>(new Date())
-    const [events, setEvents] = React.useState<Event[]>([])
-    // Replace separate dialog states with a single dialog control object
+    const [currentDate, setCurrentDate] = React.useState<Date>(new Date());
+    const [events, setEvents] = React.useState<Event[]>([]); // Start empty to avoid SSR mismatch
+    const [isMounted, setIsMounted] = React.useState(false); // Track if the component has mounted
+
+    // Load events from localStorage after mount (Client-side only)
+    React.useEffect(() => {
+        setIsMounted(true); // Mark as mounted to avoid hydration mismatch
+        const storedEvents = localStorage.getItem("calendarEvents");
+        if (storedEvents) {
+            setEvents(JSON.parse(storedEvents));
+        }
+    }, []);
+
+    React.useEffect(() => {
+        if (isMounted) {
+            localStorage.setItem("calendarEvents", JSON.stringify(events));
+        }
+    }, [events, isMounted]);
+
     const [dialogState, setDialogState] = React.useState<{
-        type: 'none' | 'add' | 'edit';
+        type: "none" | "add" | "edit";
         isOpen: boolean;
         event: Event | null;
     }>({
-        type: 'none',
+        type: "none",
         isOpen: false,
-        event: null
-    })
-    const [selectedDate, setSelectedDate] = React.useState<Date>(new Date())
-    const [viewMode, setViewMode] = React.useState<"month" | "year">("month")
-    const [yearView, setYearView] = React.useState<Date>(new Date())
-    const [draggedEvent, setDraggedEvent] = React.useState<Event | null>(null)
+        event: null,
+    });
 
-    // Helper functions to control dialog state
+    const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
+    const [viewMode, setViewMode] = React.useState<"month" | "year">("month");
+    const [yearView, setYearView] = React.useState<Date>(new Date());
+    const [draggedEvent, setDraggedEvent] = React.useState<Event | null>(null);
+
     const openAddEventDialog = () => {
-        setDialogState({
-            type: 'add',
-            isOpen: true,
-            event: null
-        });
+        setDialogState({ type: 'add', isOpen: true, event: null });
     };
 
     const openEditEventDialog = (event: Event) => {
-        setDialogState({
-            type: 'edit',
-            isOpen: true,
-            event
-        });
+        setDialogState({ type: 'edit', isOpen: true, event });
     };
 
     const closeDialog = () => {
-        setDialogState({
-            type: 'none',
-            isOpen: false,
-            event: null
-        });
-    };
-
-    // Derived state for backward compatibility
-    const isAddEventOpen = dialogState.type === 'add' && dialogState.isOpen;
-    const editEvent = {
-        isOpen: dialogState.type === 'edit' && dialogState.isOpen,
-        event: dialogState.event
+        setDialogState({ type: 'none', isOpen: false, event: null });
     };
 
     return (
